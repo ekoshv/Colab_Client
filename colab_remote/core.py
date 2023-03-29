@@ -2,6 +2,10 @@ import requests
 import json
 
 
+import requests
+import json
+
+
 class ColabRemote:
     def __init__(self, colab_api_url):
         """Initialize the ColabRemote class with the given Colab API URL."""
@@ -29,3 +33,15 @@ class ColabRemote:
             return results
         except Exception as e:
             return {'error': str(e)}
+
+    def execute_from_file(self, file_path, input_data=None):
+        """
+        Execute code from a file on the Colab API and return the result.
+
+        :param file_path: The path to the file containing the code.
+        :param input_data: The input data for the code execution.
+        :return: The result of the code execution.
+        """
+        with open(file_path, 'r') as file:
+            code = file.read()
+        return self.execute(code, input_data)
