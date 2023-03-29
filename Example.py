@@ -3,7 +3,7 @@ from colab_remote import ColabRemote
 
 # Replace this with the public URL of your Colab API
 colab_api_url = 'http://your-colab-api-url.ngrok.io/execute'
-colab = ColabRemote(colab_api_url)
+colabuser = ColabRemote(colab_api_url)
 
 # Prepare the input data: a random array of shape (5, 3)
 input_data = {
@@ -31,5 +31,14 @@ result = output_data_np.tolist()
 '''
 
 # Execute the TensorFlow code on Colab and get the output
-results = colab.execute(code, input_data)
+results = colabuser.execute(code, input_data)
 print("Results:", results)
+
+input_data = {
+    # Your input data here
+}
+
+file_path = 'code_file.py'
+
+results = colabuser.execute_from_file(file_path, input_data)
+print(results)
