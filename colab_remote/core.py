@@ -36,12 +36,16 @@ class ColabRemote:
 
     def execute_from_file(self, file_path, input_data=None):
         """
-        Execute code from a file on the Colab API and return the result.
+        Execute code from a file on the remote Google Colab instance.
 
         :param file_path: The path to the file containing the code.
-        :param input_data: The input data for the code execution.
+        :param input_data: Optional input data to be used in the code execution.
         :return: The result of the code execution.
         """
-        with open(file_path, 'r') as file:
-            code = file.read()
+        with open(file_path, 'r') as code_file:
+            code = code_file.read()
+
+        if input_data is None:
+            input_data = {}
+
         return self.execute(code, input_data)
