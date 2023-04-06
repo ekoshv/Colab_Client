@@ -2,7 +2,7 @@ import numpy as np
 from colab_remote import ColabRemote
 
 # Replace this with the public URL of your Colab API
-colab_api_url = 'http://your-colab-api-url.ngrok.io/execute'
+colab_api_url = 'http://b8fe-104-197-236-67.ngrok.io/execute'
 colabuser = ColabRemote(colab_api_url)
 
 # Prepare the input data: a random array of shape (5, 3)
@@ -35,7 +35,7 @@ results = colabuser.execute(code, input_data)
 print("Results:", results)
 
 input_data = {
-    # Your input data here
+    'data': np.random.rand(5, 3).tolist()
 }
 
 file_path = 'code_file.py'
