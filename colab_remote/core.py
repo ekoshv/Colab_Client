@@ -1,8 +1,17 @@
 import requests
 import json
 from tqdm import tqdm
-from io import BytesIO
+import io
 
+class ProgressBytesIO(io.BytesIO):
+    def __init__(self, data, progress_bar):
+        super().__init__(data)
+        self.progress_bar = progress_bar
+
+    def read(self, n=-1):
+        chunk = super().read(n)
+        self.progress_bar.update(len(chunk))
+        return chunk
 
 class ColabRemote:
     def __init__(self, colab_api_url):
@@ -26,18 +35,17 @@ class ColabRemote:
         }
 
         try:
-            # Wrap the data in a BytesIO buffer for tqdm
-            buffer = BytesIO(json.dumps(data).encode())
-            total_size = len(buffer.getvalue())
+            # Create a JSON-encoded data buffer
+            data_bytes = json.dumps(data).encode()
+            total_size = len(data_bytes)
 
-            def progress_bar(bytes_sent):
-                nonlocal total_size
-                tqdm.write(f"Uploaded: {bytes_sent}/{total_size} bytes")
-                return bytes_sent
-
-            # Use the progress bar with the tqdm library
+            # Create a progress bar with tqdm
             with tqdm(total=total_size, unit='B', unit_scale=True, unit_divisor=1024, miniters=1, desc="Uploading data") as pbar:
-                response = requests.post(self.colab_api_url, data=buffer, headers={'Content-Type': 'application/json'}, hooks={'response': [progress_bar]})
+                # Wrap the data in a custom ProgressBytesIO buffer
+                buffer = ProgressBytesIO(data_bytes, pbar)
+
+                # Send the request with the custom buffer
+                response = requests.post(self.colab_api_url, data=buffer, headers={'Content-Type': 'application/json'})
                 results = response.json()
                 return results
         except Exception as e:
