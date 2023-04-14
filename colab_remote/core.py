@@ -1,34 +1,32 @@
-import requests
 import json
 import os
 import tempfile
-from io import BytesIO
-from tqdm import tqdm
+from contextlib import ExitStack
 from functools import partial
+
 import pandas as pd
+import requests
+from tqdm import tqdm
 
 class ColabRemote:
     def __init__(self, colab_api_url):
-        """Initialize the ColabRemote class with the given Colab API URL."""
         self.colab_api_url = colab_api_url
 
     def progress_bar(self, pbar):
-        """
-        Create a progress bar callback for the requests library.
-        :param pbar: The tqdm progress bar instance.
-        :return: The custom hook function for the progress bar.
-        """
-        def hook(response, *args, **kwargs):
-            nonlocal pbar
-            total_size = int(response.headers.get("Content-Length", 0))
+        def update_to(value, total):
+            if total is not None and pbar.total != total:
+                pbar.total = total
+            pbar.update(value)
+
+        def update_hook(response, *args, **kwargs):
+            total_size = response.headers.get('Content-Length', 0)
+            if total_size:
+                total_size = int(total_size)
             pbar.total = total_size
-            pbar.refresh()
+            response.raw.read = partial(response.raw.read, hooks={'response': partial(update_to, total=total_size)})
+            return response
 
-            for chunk in response.iter_content(chunk_size=8192):
-                pbar.update(len(chunk))
-                yield chunk
-
-        return hook
+        return update_hook
 
     def execute(self, code, input_data=None):
         """
@@ -56,9 +54,9 @@ class ColabRemote:
                 file_paths.append(file_path)
 
             # Upload the files to the Colab API
-            files = [("input_data", (os.path.basename(file_path), open(file_path, "rb"))) for file_path in file_paths]
-
             with tqdm(total=0, unit='B', unit_scale=True, desc="Uploading data") as pbar:
-                response = requests.post(self.colab_api_url, data={'code': code}, files=files, stream=True)
+                with ExitStack() as stack:
+                    files = [("input_data", (os.path.basename(file_path), stack.enter_context(open(file_path, "rb")))) for file_path in file_paths]
+                    response = requests.post(self.colab_api_url, data={'code': code}, files=files, stream=True)
                 results = json.loads(''.join(map(lambda x: x.decode(), self.progress_bar(pbar)(response))))
                 return results
