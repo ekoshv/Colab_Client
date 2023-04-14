@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='colab_remote',
-    version='0.3.2',
+    version='0.3.6',
     packages=find_packages(),
     install_requires=[
         'requests',
