@@ -54,5 +54,10 @@ class ColabRemote:
                             pbar.update(len(chunk))
                             content += chunk
 
-                results = json.loads(content.decode())
+                try:
+                    results = json.loads(content.decode())
+                except json.JSONDecodeError:
+                    print(f"Unexpected response content: {content.decode()}")
+                    raise
+
                 return results
