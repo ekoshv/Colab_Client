@@ -5,6 +5,7 @@ import tempfile
 from io import BytesIO
 from tqdm import tqdm
 from functools import partial
+import pandas as pd
 
 class ColabRemote:
     def __init__(self, colab_api_url):
