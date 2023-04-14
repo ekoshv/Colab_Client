@@ -1,7 +1,6 @@
 import json
 import os
 import tempfile
-from contextlib import ExitStack
 from functools import partial
 
 import pandas as pd
@@ -11,22 +10,6 @@ from tqdm import tqdm
 class ColabRemote:
     def __init__(self, colab_api_url):
         self.colab_api_url = colab_api_url
-
-    def progress_bar(self, pbar):
-        def update_to(value, total):
-            if total is not None and pbar.total != total:
-                pbar.total = total
-            pbar.update(value)
-
-        def update_hook(response, *args, **kwargs):
-            total_size = response.headers.get('Content-Length', 0)
-            if total_size:
-                total_size = int(total_size)
-            pbar.total = total_size
-            response.raw.read = partial(response.raw.read, hooks={'response': partial(update_to, total=total_size)})
-            return response
-
-        return update_hook
 
     def execute(self, code, input_data=None):
         """
@@ -55,8 +38,21 @@ class ColabRemote:
 
             # Upload the files to the Colab API
             with tqdm(total=0, unit='B', unit_scale=True, desc="Uploading data") as pbar:
-                with ExitStack() as stack:
-                    files = [("input_data", (os.path.basename(file_path), stack.enter_context(open(file_path, "rb")))) for file_path in file_paths]
+                with open(file_paths[0], "rb") as f:
+                    files = {"input_data": (os.path.basename(file_paths[0]), f)}
                     response = requests.post(self.colab_api_url, data={'code': code}, files=files, stream=True)
-                results = json.loads(''.join(map(lambda x: x.decode(), self.progress_bar(pbar)(response))))
+                    response.raise_for_status()
+
+                    total_size = int(response.headers.get("Content-Length", 0))
+                    if total_size:
+                        pbar.total = total_size
+
+                    chunk_size = 8192
+                    content = b""
+                    for chunk in response.iter_content(chunk_size):
+                        if chunk:
+                            pbar.update(len(chunk))
+                            content += chunk
+
+                results = json.loads(content.decode())
                 return results
