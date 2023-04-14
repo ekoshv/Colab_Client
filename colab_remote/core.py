@@ -11,10 +11,10 @@ class ColabRemote:
         self.colab_api_url = colab_api_url
 
     def save_input_data_to_file(self, input_data):
-        with BytesIO() as buffer:
-            pickle.dump(input_data, buffer)
-            buffer.seek(0)
-            return buffer
+        buffer = BytesIO()
+        pickle.dump(input_data, buffer)
+        buffer.seek(0)
+        return buffer
 
     def execute(self, code, input_data=None):
         if input_data is None:
