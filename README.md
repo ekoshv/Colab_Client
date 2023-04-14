@@ -8,7 +8,7 @@ There are two methods to install the `colab_remote` library:
 
 ### 1. From a Git Repository
 
-pip install git+https://github.com/ekoshv/Colab_Client.git
+pip install --upgrade --no-cache-dir git+https://github.com/ekoshv/Colab_Client.git
 
 ### 2. From Source
 To install the library from the source, first clone the repository or download the source code, then navigate to the root directory of the library and run:
