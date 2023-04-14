@@ -1,9 +1,7 @@
 import requests
 import json
-
-
-import requests
-import json
+from tqdm import tqdm
+from io import BytesIO
 
 
 class ColabRemote:
@@ -28,9 +26,20 @@ class ColabRemote:
         }
 
         try:
-            response = requests.post(self.colab_api_url, json=data)
-            results = response.json()
-            return results
+            # Wrap the data in a BytesIO buffer for tqdm
+            buffer = BytesIO(json.dumps(data).encode())
+            total_size = len(buffer.getvalue())
+
+            def progress_bar(bytes_sent):
+                nonlocal total_size
+                tqdm.write(f"Uploaded: {bytes_sent}/{total_size} bytes")
+                return bytes_sent
+
+            # Use the progress bar with the tqdm library
+            with tqdm(total=total_size, unit='B', unit_scale=True, unit_divisor=1024, miniters=1, desc="Uploading data") as pbar:
+                response = requests.post(self.colab_api_url, data=buffer, headers={'Content-Type': 'application/json'}, hooks={'response': [progress_bar]})
+                results = response.json()
+                return results
         except Exception as e:
             return {'error': str(e)}
 
