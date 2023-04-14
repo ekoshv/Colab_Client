@@ -52,7 +52,7 @@ class ColabRemote:
         :param pbar: The tqdm progress bar instance.
         :return: The update_to callback function for the progress bar.
         """
-        def update_to(num_bytes):
+        def update_to(num_bytes, **kwargs):
             nonlocal pbar
             pbar.update(num_bytes)
 
