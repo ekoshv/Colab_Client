@@ -8,6 +8,12 @@ class ColabRemote:
         self.colab_api_url = colab_api_url
 
     def execute(self, code, input_data=None):
+        """
+        Execute code on the Colab API and return the result.
+        :param code: The code to be executed on the Colab API.
+        :param input_data: The input data for the code execution.
+        :return: The result of the code execution.
+        """
         if input_data is None:
             input_data = {}
 
@@ -22,7 +28,7 @@ class ColabRemote:
         try:
             response = requests.post(self.colab_api_url, json=data)
             base64_results = response.json()['result']
-            pickled_results = base64.b64decode(base64_results)
+            pickled_results = base64.b64decode(base64_results.encode('utf-8'))
             results = pickle.loads(pickled_results)
             return results
         except Exception as e:
