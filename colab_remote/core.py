@@ -1,5 +1,6 @@
 import requests
 import pickle
+import base64
 
 class ColabRemote:
     def __init__(self, colab_api_url):
