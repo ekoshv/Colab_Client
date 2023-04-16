@@ -26,19 +26,34 @@ input_data_np = np.array(input_data['data'])
 # Run the model on the input data
 output_data_np = model.predict(input_data_np)
 
-# Convert the output data to a list for serialization
-result = output_data_np.tolist()
+# Save the model as a complex object
+result = model
 '''
 
 # Execute the TensorFlow code on Colab and get the output
-results = colabuser.execute(code, input_data)
+results = colabuser.execute(code, input_data, complex_input=None)
 print("Results:", results)
 
-input_data = {
-    'data': np.random.rand(5, 3).tolist()
-}
+# Load the returned model
+model = results['result']
 
-file_path = 'code_file.py'
+# Use the model to make predictions on new data
+new_input_data = np.random.rand(5, 3)
+output_data = model.predict(new_input_data)
+print("Predictions on new data:", output_data)
 
-results = colabuser.execute_from_file(file_path, input_data)
-print(results)
+# Save the TensorFlow code in a file
+with open('code_file.py', 'w') as code_file:
+    code_file.write(code)
+
+# Execute the code from the file and get the output
+results_from_file = colabuser.execute_from_file('code_file.py', input_data, complex_input=None)
+print("Results from file:", results_from_file)
+
+# Load the returned model from the file
+model_from_file = results_from_file['result']
+
+# Use the model from the file to make predictions on new data
+new_input_data_from_file = np.random.rand(5, 3)
+output_data_from_file = model_from_file.predict(new_input_data_from_file)
+print("Predictions on new data from file:", output_data_from_file)
