@@ -1,5 +1,5 @@
 import requests
-import pickle
+import json
 
 class ColabRemote:
     def __init__(self, colab_api_url):
@@ -16,17 +16,14 @@ class ColabRemote:
         if input_data is None:
             input_data = {}
 
-        pickled_input_data = pickle.dumps(input_data)
-        files = {
-            'input_data': ('input_data.pkl', pickled_input_data),
-            'code': ('code.py', code)
+        data = {
+            'input_data': input_data,
+            'code': code
         }
 
         try:
-            response = requests.post(self.colab_api_url, files=files)
-            print(f"Response status code: {response.status_code}")  # Debugging print
-            print(f"Response content: {response.content}")  # Debugging print
-            results = pickle.loads(response.content)
+            response = requests.post(self.colab_api_url, json=data)
+            results = response.json()
             return results
         except Exception as e:
             return {'error': str(e)}
