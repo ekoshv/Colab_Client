@@ -24,6 +24,8 @@ class ColabRemote:
 
         try:
             response = requests.post(self.colab_api_url, files=files)
+            print(f"Response status code: {response.status_code}")  # Debugging print
+            print(f"Response content: {response.content}")  # Debugging print
             results = pickle.loads(response.content)
             return results
         except Exception as e:
