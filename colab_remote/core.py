@@ -18,17 +18,17 @@ class ColabRemote:
             input_data = {}
 
         pickled_input_data = pickle.dumps(input_data)
-        base64_input_data = base64.b64encode(pickled_input_data)
+        base64_input_data = base64.b64encode(pickled_input_data).decode('utf-8')
 
         data = {
-            'input_data': base64_input_data.decode('utf-8'),
+            'input_data': base64_input_data,
             'code': code
         }
 
         try:
             response = requests.post(self.colab_api_url, json=data)
             base64_results = response.json()['result']
-            pickled_results = base64.b64decode(base64_results.encode('utf-8'))
+            pickled_results = base64.b64decode(base64_results)
             results = pickle.loads(pickled_results)
             return results
         except Exception as e:
