@@ -1,4 +1,5 @@
 import numpy as np
+import tensorflow as tf
 from colab_remote import ColabRemote
 
 # Replace this with the public URL of your Colab API
