@@ -36,10 +36,10 @@ results = colabuser.execute(code, input_data)
 if 'error' in results:
     print("Error:", results['error'])
 else:
-    # Load the returned model
     model = results['result']
+    print("Model:", model)
 
-    # Use the model to make predictions on new data
+    # You can now use the returned model in the client side
     new_input_data = np.random.rand(5, 3)
-    output_data = model.predict(new_input_data)
-    print("Predictions on new data:", output_data)
+    new_output_data = model.predict(new_input_data)
+    print("New output data:", new_output_data)
